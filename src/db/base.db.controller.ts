@@ -21,9 +21,10 @@ export class BaseDbController {
     if (connection === undefined) {
       connection = await this.AcquireDBConnection();
     }
+    console.log(`executing sql: ${sqlStatement}`);
     const result = await connection.query(sqlStatement);
     const rows = result.rows;
-    // console.log(`execute sql: ${sqlStatement}, get result:`, rows);
+    console.log(`get result:`, rows);
     if (closeConnection) {
       await connection.close(); // Disconnect
     }

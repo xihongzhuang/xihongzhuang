@@ -23,6 +23,7 @@ export class TraderRoutes extends CommonRoutesConfig {
       })
       .post((req: express.Request, res: express.Response) => {
         let newTrader = req.body as ITrader;
+        console.log("decoded=>", newTrader);
         this._controller
           .Insert(newTrader)
           .then((resp) => {

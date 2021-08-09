@@ -73,6 +73,7 @@ export class TraderController extends BaseDbController {
     await statement.execute({
       params: [dataIn.username, dataIn.upassword, dataIn.email],
     });
+    console.log("inserted=>", dataIn);
     return await this.QueryByUsername(dataIn.username, connection);
   }
 
@@ -116,7 +117,7 @@ export class TraderController extends BaseDbController {
     username: string,
     connection?: Connection
   ): Promise<ITrader> {
-    const rows = await this.doQueryAll(connection, "username=" + username);
+    const rows = await this.doQueryAll(connection, `username='${username}'`);
     let p = new Promise<ITrader>((resolve, reject) => {
       if (rows && Array.isArray(rows) && rows.length > 0) {
         resolve(this.convert2TS(rows[0]));
