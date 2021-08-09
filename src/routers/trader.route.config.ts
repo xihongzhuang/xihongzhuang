@@ -1,17 +1,16 @@
 import express from "express";
-import TickerController from "../db/ticker.controller";
+import { TraderController } from "../db/trader.controller";
 import { CommonRoutesConfig } from "./common.route.config";
-import { ITicker } from "../db/datamodel";
+import { ITrader } from "../db/datamodel";
 
-export class TickerRoutes extends CommonRoutesConfig {
-  private _controller = new TickerController();
-
+export class TraderRoutes extends CommonRoutesConfig {
+  private _controller = new TraderController();
   constructor(app: express.Application) {
-    super(app, "ticker");
+    super(app, "TraderRoutes");
   }
   configureRoutes(): express.Application {
     this.app
-      .route(`/tickers`)
+      .route(`/traders`)
       .get((req: express.Request, res: express.Response) => {
         this._controller
           .QueryAll()
@@ -23,10 +22,9 @@ export class TickerRoutes extends CommonRoutesConfig {
           });
       })
       .post((req: express.Request, res: express.Response) => {
-        let newTicker = req.body as ITicker;
-        // console.log("get newTicker POST", newTicker);
+        let newTrader = req.body as ITrader;
         this._controller
-          .Insert(newTicker)
+          .Insert(newTrader)
           .then((resp) => {
             res.status(200).json(resp);
           })
@@ -36,12 +34,12 @@ export class TickerRoutes extends CommonRoutesConfig {
       });
 
     this.app
-      .route(`/tickers/:tickerId`)
+      .route(`/traders/:traderId`)
       .get((req: express.Request, res: express.Response) => {
+        const trader_id: number = +req.params.traderId;
         this._controller
-          .QueryOne(req.params.tickerId)
+          .QueryOne(trader_id)
           .then((resp) => {
-            // res.status(200).send(JSON.stringify(resp));
             res.status(200).json(resp);
           })
           .catch((err) => {
@@ -49,22 +47,17 @@ export class TickerRoutes extends CommonRoutesConfig {
           });
       })
       .delete((req: express.Request, res: express.Response) => {
+        const trader_id: number = +req.params.traderId;
         this._controller
-          .Delete(req.params.tickerId)
+          .Delete(trader_id)
           .then((resp) => {
-            res.status(200).send(`deleted tickerId: ${req.params.tickerId}`);
+            res.status(200).send(`DELETED TraderId: ${req.params.traderId}`);
           })
           .catch((err) => {
-            res
-              .status(500)
-              .send(
-                `Failed to delete tickerId ${req.params.tickerId}, error:${err}`
-              );
+            res.status(500).send(`error:${err}`);
           });
       });
 
     return this.app;
   }
 }
-
-export default TickerController;

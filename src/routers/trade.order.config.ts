@@ -1,19 +1,18 @@
-import express from "express";
-import TickerController from "../db/ticker.controller";
+import TradeOrderController from "../db/trade.order.controller";
 import { CommonRoutesConfig } from "./common.route.config";
-import { ITicker } from "../db/datamodel";
+import express from "express";
+import { ITradeOrder } from "../db/datamodel";
 
-export class TickerRoutes extends CommonRoutesConfig {
-  private _controller = new TickerController();
-
+export class TradeOrderRoutes extends CommonRoutesConfig {
+  private tradeOrderCtl = new TradeOrderController();
   constructor(app: express.Application) {
-    super(app, "ticker");
+    super(app, "TradeOrderRoutes");
   }
   configureRoutes(): express.Application {
     this.app
-      .route(`/tickers`)
+      .route(`/orders`)
       .get((req: express.Request, res: express.Response) => {
-        this._controller
+        this.tradeOrderCtl
           .QueryAll()
           .then((resp) => {
             res.status(200).json(resp);
@@ -23,10 +22,11 @@ export class TickerRoutes extends CommonRoutesConfig {
           });
       })
       .post((req: express.Request, res: express.Response) => {
-        let newTicker = req.body as ITicker;
-        // console.log("get newTicker POST", newTicker);
-        this._controller
-          .Insert(newTicker)
+        // console.log("req.body=>", req.body);
+        const newOrder = req.body as ITradeOrder;
+        console.log("newOrder=>", newOrder);
+        this.tradeOrderCtl
+          .Insert(newOrder)
           .then((resp) => {
             res.status(200).json(resp);
           })
@@ -36,12 +36,11 @@ export class TickerRoutes extends CommonRoutesConfig {
       });
 
     this.app
-      .route(`/tickers/:tickerId`)
+      .route(`/orders/:orderId`)
       .get((req: express.Request, res: express.Response) => {
-        this._controller
-          .QueryOne(req.params.tickerId)
+        this.tradeOrderCtl
+          .QueryOne(req.params.orderId)
           .then((resp) => {
-            // res.status(200).send(JSON.stringify(resp));
             res.status(200).json(resp);
           })
           .catch((err) => {
@@ -49,22 +48,18 @@ export class TickerRoutes extends CommonRoutesConfig {
           });
       })
       .delete((req: express.Request, res: express.Response) => {
-        this._controller
-          .Delete(req.params.tickerId)
+        this.tradeOrderCtl
+          .Delete(req.params.orderId)
           .then((resp) => {
-            res.status(200).send(`deleted tickerId: ${req.params.tickerId}`);
+            res.status(200).json(resp);
           })
           .catch((err) => {
             res
               .status(500)
-              .send(
-                `Failed to delete tickerId ${req.params.tickerId}, error:${err}`
-              );
+              .send(`DELETE on orderId: ${req.params.orderId}, error:${err}`);
           });
       });
 
     return this.app;
   }
 }
-
-export default TickerController;

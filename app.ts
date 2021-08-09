@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import * as http from "http";
 import { CommonRoutesConfig } from "./src/routers/common.route.config";
 import { TickerRoutes } from "./src/routers/ticker.route.config";
+import { TraderRoutes } from "./src/routers/trader.route.config";
+import { TradeOrderRoutes } from "./src/routers/trade.order.config";
+import { TradeRoutes } from "./src/routers/trade.route.config";
 
 import * as winston from "winston";
 import * as expressWinston from "express-winston";
@@ -30,6 +33,9 @@ if (process.env.DEBUG !== "on") {
 }
 app.use(expressWinston.logger(loggerOptions));
 routes.push(new TickerRoutes(app));
+routes.push(new TraderRoutes(app));
+routes.push(new TradeOrderRoutes(app));
+routes.push(new TradeRoutes(app));
 
 const runningMessage = `Server running at http://localhost:${port}`;
 app.get("/", (req: express.Request, res: express.Response) => {
