@@ -175,9 +175,11 @@ export class TradeOrderController extends BaseDbController {
     let res: ITrade[] = [];
     const connection = await this.AcquireDBConnection();
     try {
+      // this view is sorted by price desc
       let sqlbids = `select price_limit,quantity_needed,order_id,trader_id from view_bids where ticker_id=${tickerId} limit 10;`;
       let resbids = await this.ExecSQL(sqlbids, connection, false);
       if (!resbids || resbids.length == 0) return res;
+      // this view is sorted by price asc
       let sqloffers = `select price_limit,quantity_needed,order_id,trader_id from view_offers where ticker_id=${tickerId} limit 10;`;
       let resoffers = await this.ExecSQL(sqloffers, connection, false);
       if (!resoffers || resoffers.length == 0) return res;
@@ -188,9 +190,11 @@ export class TradeOrderController extends BaseDbController {
         if (bid.price_limit < offer.price_limit) {
           break;
         }
+        let midPrice =
+          offer.price_limit + (bid.price_limit - offer.price_limit) / 2;
         let tradeNew: ITrade = {
           ticker_id: tickerId,
-          price: offer.price_limit,
+          price: midPrice,
           quantity: Math.min(bid.quantity, offer.quantity),
           buy_order: bid.order_id,
           sell_order: offer.order_id,
