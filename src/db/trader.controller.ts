@@ -84,7 +84,7 @@ export class TraderController extends BaseDbController {
     const statement = await connection.prepare(
       `delete from ${this.tableName} where trader_id=$1`,
       {
-        paramTypes: [DataTypeOIDs.varchar],
+        paramTypes: [DataTypeOIDs.numeric],
       }
     );
     await statement.execute({ params: [trader_id] });

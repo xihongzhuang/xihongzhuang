@@ -48,15 +48,15 @@ export class TradeRoutes extends CommonRoutesConfig {
       })
       .delete((req: express.Request, res: express.Response) => {
         this._controller
-          .Delete(req.params.TradeId)
+          .Delete(req.params.tradeId)
           .then((resp) => {
-            res.status(200).send(`deleted TradeId: ${req.params.TradeId}`);
+            res.status(200).send(`deleted tradeId: ${req.params.tradeId}`);
           })
           .catch((err) => {
             res
               .status(500)
               .send(
-                `Failed to delete TradeId ${req.params.TradeId}, error:${err}`
+                `Failed to delete tradeId ${req.params.tradeId}, error:${err}`
               );
           });
       });

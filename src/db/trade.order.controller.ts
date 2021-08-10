@@ -169,60 +169,104 @@ export class TradeOrderController extends BaseDbController {
     };
     return res;
   }
+  convertArray(arr: any[]): IBidOrOffer[] {
+    let res: IBidOrOffer[] = [];
+    arr.forEach((a) => {
+      res.push(this.convert2BidOrOffer(a));
+    });
+    return res;
+  }
 
   //   return the list of trade_id created
+  // TODO: make this operation transactional
   async GenerateTrades(tickerId: string): Promise<ITrade[]> {
     let res: ITrade[] = [];
     const connection = await this.AcquireDBConnection();
     try {
       // this view is sorted by price desc
-      let sqlbids = `select price_limit,quantity_needed,order_id,trader_id from view_bids where ticker_id=${tickerId} limit 10;`;
+      let sqlbids = `select price_limit,quantity_needed,order_id,trader_id from view_bids where ticker_id='${tickerId}' limit 10;`;
       let resbids = await this.ExecSQL(sqlbids, connection, false);
       if (!resbids || resbids.length == 0) return res;
       // this view is sorted by price asc
-      let sqloffers = `select price_limit,quantity_needed,order_id,trader_id from view_offers where ticker_id=${tickerId} limit 10;`;
+      let sqloffers = `select price_limit,quantity_needed,order_id,trader_id from view_offers where ticker_id='${tickerId}' limit 10;`;
       let resoffers = await this.ExecSQL(sqloffers, connection, false);
       if (!resoffers || resoffers.length == 0) return res;
-
-      for (let i = 0, j = 0; i < resbids.length && j < resoffers.length; ) {
-        const bid = this.convert2BidOrOffer(resbids[i]);
-        const offer = this.convert2BidOrOffer(resoffers[j]);
-        if (bid.price_limit < offer.price_limit) {
+      let bids = this.convertArray(resbids);
+      let offers = this.convertArray(resoffers);
+      for (let i = 0, j = 0; i < bids.length && j < offers.length; ) {
+        if (bids[i].price_limit < offers[j].price_limit) {
           break;
         }
+        // Safty check, should not happen, just in case
+        if (bids[i].quantity <= 0) {
+          this.updateOrderStatus(
+            bids[i].order_id,
+            0,
+            OrderStatus.Completed,
+            connection
+          );
+          i++;
+          continue;
+        }
+        if (offers[j].quantity <= 0) {
+          this.updateOrderStatus(
+            offers[j].order_id,
+            0,
+            OrderStatus.Completed,
+            connection
+          );
+          j++;
+          continue;
+        }
+
         let midPrice =
-          offer.price_limit + (bid.price_limit - offer.price_limit) / 2;
+          offers[j].price_limit +
+          (bids[i].price_limit - offers[j].price_limit) / 2;
         let tradeNew: ITrade = {
           ticker_id: tickerId,
           price: midPrice,
-          quantity: Math.min(bid.quantity, offer.quantity),
-          buy_order: bid.order_id,
-          sell_order: offer.order_id,
+          quantity: Math.min(bids[i].quantity, offers[j].quantity),
+          buy_order: bids[i].order_id,
+          sell_order: offers[j].order_id,
         };
         // TODO: it makes more sense to make it a transaction
         let tradeRet = await this._tradeCtrl.Insert(tradeNew);
         res.push(tradeRet);
         // update trade_order to reflect the status
         let bidStatus = OrderStatus.Opened;
-        if (bid.quantity == tradeNew.quantity) {
-          i++;
+        let offerStatus = OrderStatus.Opened;
+        if (bids[i].quantity == tradeNew.quantity) {
+          // bids use up quantity
+          bids[i].quantity = 0;
+          offers[j].quantity -= tradeNew.quantity;
           bidStatus = OrderStatus.Completed;
+          if (offers[j].quantity == 0) {
+            offerStatus = OrderStatus.Completed;
+            j++;
+          }
+          i++;
+        } else {
+          // offer use up quantity
+          offers[j].quantity = 0;
+          bids[i].quantity -= tradeNew.quantity;
+          // means bids and offer has the same quantity
+          if (bids[i].quantity == 0) {
+            bidStatus = OrderStatus.Completed;
+            i++;
+          }
+          offerStatus = OrderStatus.Completed;
+          j++;
         }
-        this.updateOrderStatus(
-          bid.order_id,
+        await this.updateOrderStatus(
+          tradeNew.buy_order,
           tradeNew.quantity,
           bidStatus,
           connection
         );
-        let offerStatus = OrderStatus.Opened;
-        if (offer.quantity == tradeNew.quantity) {
-          j++;
-          offerStatus = OrderStatus.Completed;
-        }
-        this.updateOrderStatus(
-          offer.order_id,
+        await this.updateOrderStatus(
+          tradeNew.sell_order,
           tradeNew.quantity,
-          bidStatus,
+          offerStatus,
           connection
         );
       }
@@ -239,19 +283,26 @@ export class TradeOrderController extends BaseDbController {
     status: OrderStatus,
     connection: Connection
   ): Promise<void> {
-    const statement = await connection.prepare(
-      `update trade_order set filled_quantity = filled_quantity + $1, order_status = $2 where order_id=$3`,
-      {
-        paramTypes: [
-          DataTypeOIDs.numeric,
-          DataTypeOIDs.varchar,
-          DataTypeOIDs.varchar,
-        ],
-      }
+    console.log(
+      `execute updateOrderStatus on ${order_id}, filled quantity:${quantity}, ${status}`
     );
-    await statement.execute({
-      params: [quantity, status, order_id],
-    });
+    try {
+      const statement = await connection.prepare(
+        `update trade_order set filled_quantity=filled_quantity+$1,order_status=$2 where order_id=$3`,
+        {
+          paramTypes: [
+            DataTypeOIDs.numeric,
+            DataTypeOIDs.varchar,
+            DataTypeOIDs.uuid,
+          ],
+        }
+      );
+      await statement.execute({
+        params: [quantity, status, order_id],
+      });
+    } catch (err) {
+      console.log(`updateOrderStatus on ${order_id}, error: ${err}`);
+    }
   }
 
   async QueryAll(connection?: Connection): Promise<ITradeOrder[]> {

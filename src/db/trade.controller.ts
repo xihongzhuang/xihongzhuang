@@ -70,12 +70,12 @@ export class TradeController extends BaseDbController {
       values ($1,$2,$3,$4,$5,$6)`,
       {
         paramTypes: [
-          DataTypeOIDs.varchar,
+          DataTypeOIDs.uuid,
           DataTypeOIDs.varchar,
           DataTypeOIDs.numeric,
           DataTypeOIDs.numeric,
-          DataTypeOIDs.varchar,
-          DataTypeOIDs.varchar,
+          DataTypeOIDs.uuid,
+          DataTypeOIDs.uuid,
         ],
       }
     );
@@ -92,17 +92,17 @@ export class TradeController extends BaseDbController {
     return await this.QueryOne(dataIn.trade_id, connection);
   }
 
-  async Delete(order_id: string, connection?: Connection): Promise<void> {
+  async Delete(trade_id: string, connection?: Connection): Promise<void> {
     if (connection === undefined) {
       connection = await this.AcquireDBConnection();
     }
     const statement = await connection.prepare(
-      `delete from ${this.tableName} where order_id=$1`,
+      `delete from ${this.tableName} where trade_id=$1`,
       {
-        paramTypes: [DataTypeOIDs.varchar],
+        paramTypes: [DataTypeOIDs.uuid],
       }
     );
-    await statement.execute({ params: [order_id] });
+    await statement.execute({ params: [trade_id] });
   }
 
   async QueryOne(trade_id: string, connection?: Connection): Promise<ITrade> {
@@ -127,25 +127,6 @@ export class TradeController extends BaseDbController {
     await connection.close(); // Disconnect
     return p;
   }
-
-  //   async QueryByUsername(
-  //     username: string,
-  //     connection?: Connection
-  //   ): Promise<ITrade> {
-  //     const rows = this.doQueryAll(connection, "username=" + username);
-  //     let p = new Promise<ITrade>((resolve, reject) => {
-  //       if (rows && Array.isArray(rows) && rows.length > 0) {
-  //         resolve(this.convert2TS(rows[0]));
-  //       } else {
-  //         reject(
-  //           new Error(
-  //             `no record found in Trader table with username = ${username}!`
-  //           )
-  //         );
-  //       }
-  //     });
-  //     return p;
-  //   }
 
   async QueryAll(connection?: Connection): Promise<ITrade[]> {
     const rows = await this.doQueryAll(connection);
