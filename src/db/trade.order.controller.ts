@@ -199,7 +199,7 @@ export class TradeOrderController extends BaseDbController {
         }
         // Safty check, should not happen, just in case
         if (bids[i].quantity <= 0) {
-          this.updateOrderStatus(
+          await this.updateOrderStatus(
             bids[i].order_id,
             0,
             OrderStatus.Completed,
@@ -209,7 +209,7 @@ export class TradeOrderController extends BaseDbController {
           continue;
         }
         if (offers[j].quantity <= 0) {
-          this.updateOrderStatus(
+          await this.updateOrderStatus(
             offers[j].order_id,
             0,
             OrderStatus.Completed,

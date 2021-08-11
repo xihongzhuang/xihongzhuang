@@ -18,21 +18,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+// import { v4 as uuidv4 } from "uuid";
 const _chai = __importStar(require("chai"));
+// import { ITicker } from "../src/db/datamodel";
 // import { mock, instance } from "ts-mockito";
-const psql_1 = require("../src/db/psql");
+const ticker_controller_1 = __importDefault(require("../src/db/ticker.controller"));
 _chai.should();
 // @suite
+let testTicker = new ticker_controller_1.default();
 class QueryAllTickersUnitTests {
     before() {
-        psql_1.qAllTickers()
+        testTicker
+            .QueryAll()
             .then((resp) => {
-            console.log("resp:", resp);
+            console.log("resp:", JSON.stringify(resp));
         })
             .catch((err) => {
             console.log("error:", err);
         });
     }
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHNxbC51bml0LnRlc3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi90ZXN0cy9wc3FsLnVuaXQudGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFDQSw0Q0FBOEI7QUFDOUIsK0NBQStDO0FBQy9DLHlDQUE2QztBQUM3QyxLQUFLLENBQUMsTUFBTSxFQUFFLENBQUM7QUFDZixTQUFTO0FBQ1QsTUFBTSx3QkFBd0I7SUFDNUIsTUFBTTtRQUNKLGtCQUFXLEVBQUU7YUFDVixJQUFJLENBQUMsQ0FBQyxJQUFJLEVBQUUsRUFBRTtZQUNiLE9BQU8sQ0FBQyxHQUFHLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxDQUFDO1FBQzdCLENBQUMsQ0FBQzthQUNELEtBQUssQ0FBQyxDQUFDLEdBQUcsRUFBRSxFQUFFO1lBQ2IsT0FBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLEVBQUUsR0FBRyxDQUFDLENBQUM7UUFDN0IsQ0FBQyxDQUFDLENBQUM7SUFDUCxDQUFDO0NBS0YifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHNxbC51bml0LnRlc3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi90ZXN0cy9wc3FsLnVuaXQudGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFDQSx1Q0FBdUM7QUFDdkMsNENBQThCO0FBQzlCLGlEQUFpRDtBQUNqRCwrQ0FBK0M7QUFDL0Msb0ZBQTJEO0FBQzNELEtBQUssQ0FBQyxNQUFNLEVBQUUsQ0FBQztBQUNmLFNBQVM7QUFFVCxJQUFJLFVBQVUsR0FBRyxJQUFJLDJCQUFnQixFQUFFLENBQUM7QUFFeEMsTUFBTSx3QkFBd0I7SUFDNUIsTUFBTTtRQUNKLFVBQVU7YUFDUCxRQUFRLEVBQUU7YUFDVixJQUFJLENBQUMsQ0FBQyxJQUFJLEVBQUUsRUFBRTtZQUNiLE9BQU8sQ0FBQyxHQUFHLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQztRQUM3QyxDQUFDLENBQUM7YUFDRCxLQUFLLENBQUMsQ0FBQyxHQUFHLEVBQUUsRUFBRTtZQUNiLE9BQU8sQ0FBQyxHQUFHLENBQUMsUUFBUSxFQUFFLEdBQUcsQ0FBQyxDQUFDO1FBQzdCLENBQUMsQ0FBQyxDQUFDO0lBQ1AsQ0FBQztDQVFGIn0=

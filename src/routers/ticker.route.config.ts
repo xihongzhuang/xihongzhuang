@@ -19,7 +19,7 @@ export class TickerRoutes extends CommonRoutesConfig {
             res.status(200).json(resp);
           })
           .catch((err) => {
-            res.status(500).send(`error: ${err}`);
+            res.status(404).send(`error: ${err}`);
           });
       })
       .post((req: express.Request, res: express.Response) => {
@@ -31,7 +31,7 @@ export class TickerRoutes extends CommonRoutesConfig {
             res.status(200).json(resp);
           })
           .catch((err) => {
-            res.status(500).send(`error: ${err}`);
+            res.status(404).send(`error: ${err}`);
           });
       });
 
@@ -45,7 +45,7 @@ export class TickerRoutes extends CommonRoutesConfig {
             res.status(200).json(resp);
           })
           .catch((err) => {
-            res.status(500).send(`error:${err}`);
+            res.status(404).send(`error:${err}`);
           });
       })
       .delete((req: express.Request, res: express.Response) => {
@@ -56,7 +56,7 @@ export class TickerRoutes extends CommonRoutesConfig {
           })
           .catch((err) => {
             res
-              .status(500)
+              .status(404)
               .send(
                 `Failed to delete tickerId ${req.params.tickerId}, error:${err}`
               );
