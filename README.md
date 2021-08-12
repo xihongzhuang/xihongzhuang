@@ -60,6 +60,13 @@ Password => xh123456
 Database => tradeweb
 ```
 
+```
+$ cd ~/workspace/tradeweb/xihongzhuang
+$ npm run serve
+```
+
+to start the backend REST server
+
 start browser UI to test placing order
 for the first time
 
