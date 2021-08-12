@@ -64,8 +64,12 @@ start browser UI to test placing order
 for the first time
 
 ```
-yarn install
+$ cd twui-tsx
+$ yarn install
 ```
 
 launch the browser UI
-yarn start
+
+```
+$ yarn start
+```
