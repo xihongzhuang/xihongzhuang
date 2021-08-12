@@ -59,3 +59,13 @@ Username => xihongzhuang
 Password => xh123456
 Database => tradeweb
 ```
+
+start browser UI to test placing order
+for the first time
+
+```
+yarn install
+```
+
+launch the browser UI
+yarn start

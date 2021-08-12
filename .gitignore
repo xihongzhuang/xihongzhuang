@@ -1,2 +1,24 @@
 /node_modules/
 /db/postgres-data/
+# dependencies
+/twui-tsx/node_modules/
+
+/twui-tsx/.pnp
+/twui-tsx/.pnp.js
+
+# testing
+/twui-tsx/coverage
+
+# production
+/twui-tsx/build
+
+# misc
+/twui-tsx/.DS_Store
+/twui-tsx/.env.local
+/twui-tsx/.env.development.local
+/twui-tsx/.env.test.local
+/twui-tsx/.env.production.local
+
+/twui-tsx/npm-debug.log*
+/twui-tsx/yarn-debug.log*
+/twui-tsx/yarn-error.log*
