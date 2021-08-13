@@ -5,9 +5,6 @@ const dburl = `http://localhost:3001/`;
 
 export const fetchTickers = async (): Promise<ITicker[]> => {
   let endpoint = `${dburl}tickers`;
-  // if (tickerId !== undefined) {
-  //   endpoint += tickerId;
-  // }
 
   const response = await axios.get<ITicker[]>(endpoint, {
     headers: {
@@ -50,6 +47,16 @@ export const postTradeOrder = async (
     },
   });
   return response.data as ITradeOrder;
+};
+
+export const postTicker = async (newTicker: ITicker): Promise<ITicker> => {
+  let endpoint = `${dburl}tickers`;
+  const response = await axios.post<ITicker>(endpoint, newTicker, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data as ITicker;
 };
 
 export const fetchTrades = async (): Promise<ITrade[]> => {

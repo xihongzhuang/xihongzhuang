@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { ITradeOrder } from "../db/datamodel";
 
-interface Props {
-  placeOrder: (newOrder: ITradeOrder | any) => void;
-}
-
 export interface IOrderTemplate {
   ticker_id: string;
   trader_id: string;
@@ -13,13 +9,15 @@ export interface IOrderTemplate {
   quantity: string;
 }
 
-export const TradeOrderForm: React.FC<Props> = ({ placeOrder }) => {
-  // const [tickerId, setTicketId] = useState("");
-  // const [traderId, setTraderId] = useState(0);
-  // const [side, setSide] = useState("buy");
-  // const [priceLimit, setPriceLimit] = useState(0);
-  // const [quatity, setQuantity] = useState(0);
+interface Props {
+  cancelHandler: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  placeOrder: (newOrder: ITradeOrder | any) => void;
+}
 
+export const TradeOrderForm: React.FC<Props> = ({
+  cancelHandler,
+  placeOrder,
+}) => {
   const [curOrder, setCurOrder] = useState<IOrderTemplate | {}>();
   const handleOrderData = (e: React.FormEvent<HTMLInputElement>) => {
     setCurOrder({
@@ -77,6 +75,7 @@ export const TradeOrderForm: React.FC<Props> = ({ placeOrder }) => {
         <button disabled={curOrder === undefined ? true : false}>
           Place Order
         </button>
+        <button onClick={cancelHandler}>Cancel</button>
       </form>
     </div>
   );

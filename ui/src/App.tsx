@@ -1,35 +1,59 @@
 import React, { useState } from "react";
 import "./App.css";
 import { TickerForm } from "./components/tickerForm";
+import { TickerCreateForm } from "./components/tickerCreate";
 import { TradeOrderForm } from "./components/tradeOrderForm";
+import { TradeForm } from "./components/tradeForm";
 
-import { fetchTickers, postTradeOrder } from "./API_tw";
+import {
+  fetchTickers,
+  fetchTrades,
+  postTradeOrder,
+  postTicker,
+} from "./API_tw";
 // styles
 // import { GlobalStyle } from "./App.styles";
-import { ITicker, ITradeOrder } from "./db/datamodel";
+import { ITicker, ITradeOrder, ITrade } from "./db/datamodel";
+
+enum enumAction {
+  ActShowNone = 0,
+  ActShowTickers = 1,
+  ActCreateTicker = 2,
+  ActShowTrades = 3,
+  ActStartOrder = 4,
+}
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [startOrder, setStartOrder] = useState<boolean>(false);
-  const [gameOver, setGameOver] = useState<boolean>(true);
-  const [tikers, setTickers] = useState<ITicker[]>([]);
+  const [curAction, setCurAction] = useState<enumAction>(
+    enumAction.ActShowNone
+  );
+  const [tickers, setTickers] = useState<ITicker[]>([]);
+  const [trades, setTrades] = useState<ITrade[]>([]);
 
-  console.log("tickers: ", tikers);
-  const startTrade = async () => {
+  // console.log("tickers: ", tickers);
+  const getAllTickers = async () => {
     setLoading(true);
-    setGameOver(false);
+    setCurAction(enumAction.ActShowTickers);
     const response = await fetchTickers();
     setTickers(response);
     setLoading(false);
   };
 
+  const getAllTrades = async () => {
+    setLoading(true);
+    setCurAction(enumAction.ActShowTrades);
+    const response = await fetchTrades();
+    setTrades(response);
+    setLoading(false);
+  };
+
   const startTradeOrder = async () => {
-    setStartOrder(true);
-    setGameOver(false);
+    setCurAction(enumAction.ActStartOrder);
   };
 
   const placeOrder = async (ord: ITradeOrder) => {
-    setStartOrder(false);
+    setCurAction(enumAction.ActStartOrder);
     // let ord: ITradeOrder = {
     //   ticker_id: "GOOG",
     //   trader_id: 1,
@@ -39,43 +63,74 @@ const App: React.FC = () => {
     // };
     const resp = await postTradeOrder(ord);
     console.log("New Order placed=>", resp);
-    setGameOver(true);
+    setCurAction(enumAction.ActShowNone);
   };
+
+  const startTickerCreation = async () => {
+    setCurAction(enumAction.ActCreateTicker);
+  };
+  const createNewTicker = async (tk: ITicker) => {
+    setCurAction(enumAction.ActCreateTicker);
+    const resp = await postTicker(tk);
+    console.log("New Ticker created=>", resp);
+    setCurAction(enumAction.ActShowNone);
+  };
+
   const checkAnswer = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!gameOver) {
-      setGameOver(true);
-    }
+    setCurAction(enumAction.ActShowNone);
   };
+
   return (
     <>
       <div className="App">
         <h1>Start Trade</h1>
-        {gameOver ? (
-          <button className="start" onClick={startTrade}>
+        {curAction === enumAction.ActShowNone ? (
+          <button className="start" onClick={getAllTickers}>
             Show all tickers
           </button>
         ) : null}
-        {/* {gameOver ? (
-          <button className="placeorder" onClick={placeOrder}>
-            Place Order
+        {curAction === enumAction.ActShowNone ? (
+          <button className="start" onClick={startTickerCreation}>
+            Create A new ticker
           </button>
-        ) : null} */}
-        {gameOver ? (
+        ) : null}
+        {curAction === enumAction.ActShowNone ? (
+          <button className="start" onClick={getAllTrades}>
+            Show All Trades
+          </button>
+        ) : null}
+        {curAction === enumAction.ActShowNone ? (
           <button className="placeorder" onClick={startTradeOrder}>
             Place Order
           </button>
         ) : null}
 
         {loading && <p>Loading Trade information ...</p>}
-        {!loading && !gameOver ? (
+        {!loading && curAction === enumAction.ActShowTickers ? (
           <TickerForm
             text="Tickers"
-            tickers={tikers}
+            tickers={tickers}
             onDoneCallback={checkAnswer}
           ></TickerForm>
         ) : null}
-        {startOrder && !gameOver ? (
-          <TradeOrderForm placeOrder={placeOrder}></TradeOrderForm>
+        {!loading && curAction === enumAction.ActShowTrades ? (
+          <TradeForm
+            text="Trades"
+            trades={trades}
+            onDoneCallback={checkAnswer}
+          ></TradeForm>
+        ) : null}
+        {!loading && curAction === enumAction.ActStartOrder ? (
+          <TradeOrderForm
+            placeOrder={placeOrder}
+            cancelHandler={checkAnswer}
+          ></TradeOrderForm>
+        ) : null}
+        {!loading && curAction === enumAction.ActCreateTicker ? (
+          <TickerCreateForm
+            createTicker={createNewTicker}
+            cancelHandler={checkAnswer}
+          ></TickerCreateForm>
         ) : null}
       </div>
     </>
